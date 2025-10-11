@@ -17,8 +17,19 @@ export interface IInvoiceFormData {
     yourState: string;
     yourCountry: string;
     yourEmail: string;
+    yourAddress: string;
+    yourCity: string;
+    yourPinCode: number | null;
+    yourPhone: string;
 
     billTo: string;
+    billToEmail: string;
+    billToAddress: string;
+    billToCity: string;
+    billToState: string;
+    billToCountry: string;
+    billToPinCode: number | null;
+    billToPhone: string;
 
     invoiceSubject: string;
     invoiceNumber: string;

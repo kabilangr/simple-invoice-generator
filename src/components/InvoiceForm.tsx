@@ -13,8 +13,19 @@ const defaultValues: IInvoiceFormData = {
     yourState: '',
     yourCountry: '',
     yourEmail: '',
+    yourAddress: '',
+    yourCity: '',
+    yourPinCode: null,
+    yourPhone: '',
     // Client Info
     billTo: '',
+    billToEmail: '',
+    billToAddress: '',
+    billToCity: '',
+    billToState: '',
+    billToCountry: '',
+    billToPinCode: null,
+    billToPhone: '',
     // Invoice Details
     invoiceSubject: '',
     invoiceNumber: 'INV-000001',
@@ -150,19 +161,39 @@ const InvoiceForm: React.FC = () => {
                             {errors.yourName && <p className={errorStyle}>{errors.yourName.message}</p>}
                         </div>
                         <div>
-                            <label className={labelStyle}>Your Email
+                            <label className={labelStyle}>Your Email (Optional)
                                 <input type="email" {...register("yourEmail", { required: "Email is required" })} className={inputStyle} />
                             </label>
                             {errors.yourEmail && <p className={errorStyle}>{errors.yourEmail.message}</p>}
                         </div>
                         <div>
-                            <label className={labelStyle}>State/Province
+                            <label className={labelStyle}>Address (Optional)
+                                <input type="text" {...register("yourAddress")} className={inputStyle} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>City (Optional)
+                                <input type="text" {...register("yourCity")} className={inputStyle} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>State/Province (Optional)
                                 <input type="text" {...register("yourState")} className={inputStyle} />
                             </label>
                         </div>
                         <div>
-                            <label className={labelStyle}>Country
+                            <label className={labelStyle}>Country (Optional)
                                 <input type="text" {...register("yourCountry")} className={inputStyle} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>Pin Code (Optional)
+                                <input type="number" {...register("yourPinCode")} className={`${inputStyle} input-number-no-step`} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>Phone Number/Telephone (Optional)
+                                <input type="text" {...register("yourPhone")} className={`${inputStyle}`} />
                             </label>
                         </div>
                         <div>
@@ -173,7 +204,7 @@ const InvoiceForm: React.FC = () => {
                     </div>
 
                     {/* Client Information & Invoice Details */}
-                    <h2 className="text-xl font-semibold border-b pb-2 mb-4 mt-6">Client & Invoice Details</h2>
+                    <h2 className="text-xl font-semibold border-b pb-2 mb-4 mt-6">Client Details</h2>
                     <div className="grid gap-6 mb-6 md:grid-cols-2">
                         <div>
                             <label className={labelStyle}>Bill To
@@ -181,6 +212,46 @@ const InvoiceForm: React.FC = () => {
                             </label>
                             {errors.billTo && <p className={errorStyle}>{errors.billTo.message}</p>}
                         </div>
+                        <div>
+                            <label className={labelStyle}>Bill Email (Optional)
+                                <input type="email" {...register("billToEmail", { required: "Email is required" })} className={inputStyle} />
+                            </label>
+                            {errors.yourEmail && <p className={errorStyle}>{errors.yourEmail.message}</p>}
+                        </div>
+                        <div>
+                            <label className={labelStyle}>Address (Optional)
+                                <input type="text" {...register("billToAddress")} className={inputStyle} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>City (Optional)
+                                <input type="text" {...register("billToCity")} className={inputStyle} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>State/Province (Optional)
+                                <input type="text" {...register("billToState")} className={inputStyle} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>Country (Optional)
+                                <input type="text" {...register("billToCountry")} className={inputStyle} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>Pin Code (Optional)
+                                <input type="number" {...register("billToPinCode")} className={`${inputStyle} input-number-no-step`} />
+                            </label>
+                        </div>
+                        <div>
+                            <label className={labelStyle}>Phone Number/Telephone (Optional)
+                                <input type="text" {...register("billToPhone")} className={`${inputStyle}`} />
+                            </label>
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-semibold border-b pb-2 mb-4 mt-6">Invoice Details</h2>
+                    <div className="grid gap-6 mb-6 md:grid-cols-2">
+
                         <div>
                             <label className={labelStyle}>Invoice Number
                                 <input type="text" {...register("invoiceNumber", { required: "Invoice # is required" })} className={inputStyle} />

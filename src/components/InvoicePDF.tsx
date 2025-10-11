@@ -42,7 +42,7 @@ const numberToWords = (num: number): string => {
 
 const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
     const {
-        yourName, yourState, yourCountry, yourEmail, billTo,
+        yourName, yourAddress, yourCity, yourPinCode, yourState, yourCountry, yourEmail, yourPhone, billTo, billToEmail, billToPhone, billToAddress, billToCity, billToState, billToCountry, billToPinCode,
         invoiceSubject, invoiceNumber, invoiceDate, terms, dueDate,
         items, notes, authorizedSignature, logo,
         subTotal, totalAmount, balanceDue,
@@ -105,15 +105,24 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
                 {/* Sender Info (Kabilan GR) */}
                 <div className="w-1/3 space-y-1">
                     <p className="font-semibold text-gray-900">{yourName}</p>
-                    <p>{yourState}</p>
-                    <p>{yourCountry}</p>
-                    <p className="text-gray-700">{yourEmail}</p>
+                    {yourAddress && <p>{yourAddress}</p>}
+                    {(yourCity || yourPinCode) && <p>{yourCity} {yourCity && yourPinCode ? "-" : ""} {yourPinCode}</p>}
+                    {yourState && <p>{yourState}</p>}
+                    {yourCountry && <p>{yourCountry}</p>}
+                    {yourEmail && <p className="text-gray-700">{yourEmail}</p>}
+                    {yourPhone && <p className="text-gray-700">{yourPhone}</p>}
                 </div>
 
                 {/* Recipient Info (Bill To) */}
                 <div className="w-1/3 text-right">
                     <p className="font-bold text-gray-700 text-base mb-1">Bill To</p>
                     <p className="font-semibold">{billTo}</p>
+                    {billToAddress && <p>{billToAddress}</p>}
+                    {(billToCity || billToPinCode) && <p>{billToCity} {billToPinCode && billToCity ? "-" : ""} {billToPinCode}</p>}
+                    {billToState && <p>{billToState}</p>}
+                    {billToCountry && <p>{billToCountry}</p>}
+                    {billToEmail && <p className="text-gray-700">{billToEmail}</p>}
+                    {billToPhone && <p className="text-gray-700">{billToPhone}</p>}
                 </div>
             </div>
 
