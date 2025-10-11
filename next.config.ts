@@ -6,8 +6,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true, // Disable default image optimization
   },
-  assetPrefix: '/simple-invoice-generator/',
-  basePath: '/simple-invoice-generator/',
+  assetPrefix: '/simple-invoice-generator',
+  basePath: '/simple-invoice-generator',
   output: 'export',
 };
 
