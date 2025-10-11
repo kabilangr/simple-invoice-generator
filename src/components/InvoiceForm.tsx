@@ -4,8 +4,8 @@ import React, { useRef, forwardRef, type ForwardedRef, useMemo } from 'react';
 import { useForm, useFieldArray, type SubmitHandler } from 'react-hook-form';
 import { useReactToPrint } from 'react-to-print';
 import InvoicePDF from './InvoicePDF';
-// Assuming TaxType is exported from your type file
-import type { IInvoiceFormData, IInvoiceItem, TaxType } from '../type/invoice';
+
+import type { IInvoiceFormData, IInvoiceItem } from '../type/invoice';
 
 // --- Default Invoice Structure (Typed) ---
 const defaultValues: IInvoiceFormData = {
@@ -83,7 +83,7 @@ const InvoiceForm: React.FC = () => {
             totalAmount: calculatedTotalAmount,
             balanceDue: calculatedTotalAmount,
         };
-    }, [formData.items, formData.discount, formData.taxType, formData.taxRate, formData.adjustmentAmount, formData.items, formData.items]);
+    }, [formData.items, formData.discount, formData.taxType, formData.taxRate, formData.adjustmentAmount, formData.items]);
 
 
     formData.subTotal = subTotal;
@@ -108,7 +108,7 @@ const InvoiceForm: React.FC = () => {
         handlePrint();
     };
 
-    const inputStyle: string = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5";
+    const inputStyle: string = "bg-gray-50 border border-gray-300 text-gray-900 h-11 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5";
     const labelStyle: string = "block mb-2 text-sm font-medium text-gray-900";
     const errorStyle: string = "text-red-500 text-xs mt-1";
 
@@ -226,9 +226,8 @@ const InvoiceForm: React.FC = () => {
                                     <div className="col-span-1 md:col-span-3">
                                         <label className={labelStyle}>Item & Description
                                             <textarea
-                                                rows={3}
                                                 {...register(`items.${index}.description`, { required: "Description is required" })}
-                                                className={`${inputStyle} h-full`}
+                                                className={`${inputStyle}`}
                                             />
                                         </label>
                                         {errors.items?.[index]?.description && <p className={errorStyle}>{errors.items[index]!.description!.message}</p>}
@@ -266,7 +265,6 @@ const InvoiceForm: React.FC = () => {
                     </div>
 
                     {/* --- NEW: Totals Section and Inputs (matches image_b78740.png) --- */}
-                    <h2 className="text-xl font-semibold border-b pb-2 mb-4 mt-8">Summary</h2>
                     <div className="flex justify-end">
                         <div className="w-full sm:w-1/2 p-4 border rounded-lg bg-gray-50 space-y-4">
 
