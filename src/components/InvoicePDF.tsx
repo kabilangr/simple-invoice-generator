@@ -36,7 +36,6 @@ const numberToWords = (num: number): string => {
         },
     });
     // NOTE: This will return a detailed word format (e.g., "Twenty-Five Thousand Rupees Only")
-    // which is more accurate than the simple string in the original component.
     return `Indian Rupee ${toWords.convert(num)}`;
 };
 
@@ -72,9 +71,13 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
     // --- End Recalculation ---
 
     return (
-        <div className="p-8 bg-white min-h-[1123px] w-[794px] mx-auto font-sans text-gray-800">
+        // KEY CHANGE 1: Use classes to enforce A4 size and allow printing.
+        // `print:w-full print:h-[297mm]` ensures A4 size during print preview.
+        // `print:p-8` maintains consistent padding.
+        // `break-after-page` is a Tailwind utility for CSS 'page-break-after: always'
+        <div className="p-8 bg-white min-h-[1123px] w-[794px] mx-auto font-sans text-gray-800 
+                        print:w-full print:h-auto print:min-h-screen print:p-8">
 
-            {/* ... (Header, Sender/Recipient Info, Subject, Items Table sections remain unchanged) ... */}
             {/* --- Header (Logo and Invoice Title) --- */}
             <header className="flex justify-between items-start mb-6">
                 <div className="w-1/3">
@@ -97,8 +100,8 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
             </header>
 
             {/* --- Sender and Recipient Info --- */}
-            {/* The PDF places the sender info (Kabilan GR) on the left, and "Bill To" on the right. */}
-            <div className="flex justify-between mb-8 text-sm">
+            {/* Added `break-after-avoid` to ensure this important block stays together */}
+            <div className="flex justify-between mb-8 text-sm print:break-after-avoid">
                 {/* Sender Info (Kabilan GR) */}
                 <div className="w-1/3 space-y-1">
                     <p className="font-semibold text-gray-900">{yourName}</p>
@@ -115,7 +118,8 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
             </div>
 
             {/* --- Subject --- */}
-            <div className="mb-8">
+            {/* Added `break-after-avoid` */}
+            <div className="mb-8 print:break-after-avoid">
                 <p className="font-bold text-gray-700 text-sm mb-1">Subject:</p>
                 {/* The PDF's subject text is plain, not in a box or gray background */}
                 <p className="text-gray-900 font-medium whitespace-pre-wrap leading-tight">
@@ -127,7 +131,7 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
             <div className="mb-8 border border-black">
                 <table className="min-w-full border-collapse">
                     <thead>
-                        <tr className="bg-gray-100 text-left text-sm font-semibold text-gray-700 border-b border-black">
+                        <tr className="bg-gray-100 text-left text-sm font-semibold text-gray-700 border-b border-black print:break-inside-avoid">
                             {/* Headings from PDF: "#", "Item & Description", "Qty", "Rate", "Amount" */}
                             <th className="p-2 border-r border-black w-[5%] text-center">#</th>
                             <th className="p-2 border-r border-black w-[55%]">Item & Description</th> {/* Increased width for description */}
@@ -138,10 +142,9 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
                     </thead>
                     <tbody>
                         {items.map((item, index) => (
-                            // Each item row is border-b, and cell has border-r to create the grid effect
-                            <tr key={index} className="text-sm align-top border-b border-gray-300 last:border-b-0">
+                            // KEY CHANGE 3: Add `break-inside-avoid` to keep rows from splitting
+                            <tr key={index} className="text-sm align-top border-b border-gray-300 last:border-b-0 print:break-inside-avoid">
                                 <td className="p-2 border-r border-gray-300 text-center">{index + 1}</td>
-                                {/* Apply text-xs and leading-snug for smaller, compact text like the PDF */}
                                 <td className="p-2 border-r border-gray-300 whitespace-pre-wrap text-xs leading-snug">{item.description}</td>
                                 <td className="p-2 border-r border-gray-300 text-right">{item.qty.toFixed(2)}</td>
                                 <td className="p-2 border-r border-gray-300 text-right">{formatCurrency(item.rate)}</td>
@@ -153,96 +156,97 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
             </div>
 
             {/* --- Footer Details (Dates and Totals) --- */}
-            <div className="flex justify-between text-sm">
+            {/* KEY CHANGE 4: Wrap the whole footer in a div that avoids page breaks */}
+            <div className="print:break-before-auto print:break-inside-avoid">
+                <div className="flex justify-between text-sm">
 
-                {/* Dates and Terms - Left side */}
-                <div className="w-1/3 space-y-1">
-                    <p className="flex justify-between">
-                        <span className="font-bold">Invoice Date:</span>
-                        <span>{formattedInvoiceDate}</span>
-                    </p>
-                    <p className="flex justify-between">
-                        <span className="font-bold">Terms:</span>
-                        <span>{terms}</span>
-                    </p>
-                    <p className="flex justify-between">
-                        <span className="font-bold">Due Date:</span>
-                        <span>{formattedDueDate}</span>
+                    {/* Dates and Terms - Left side */}
+                    <div className="w-1/3 space-y-1">
+                        <p className="flex justify-between">
+                            <span className="font-bold">Invoice Date:</span>
+                            <span>{formattedInvoiceDate}</span>
+                        </p>
+                        <p className="flex justify-between">
+                            <span className="font-bold">Terms:</span>
+                            <span>{terms}</span>
+                        </p>
+                        <p className="flex justify-between">
+                            <span className="font-bold">Due Date:</span>
+                            <span>{formattedDueDate}</span>
+                        </p>
+                    </div>
+
+                    {/* Totals Summary - Right side (UPDATED) */}
+                    <div className="w-1/3">
+                        <table className="min-w-full text-right text-sm">
+                            <tbody>
+                                {/* 1. Sub Total */}
+                                <tr className="print:break-inside-avoid">
+                                    <td className="p-1 pr-0 font-semibold">Sub Total</td>
+                                    <td className="p-1 pl-0">{formatCurrency(subTotal)}</td>
+                                </tr>
+
+                                {/* 2. Discount */}
+                                {discount > 0 && (
+                                    <tr className="print:break-inside-avoid">
+                                        <td className="p-1 pr-0 font-medium">Discount ({discount}%)</td>
+                                        <td className="p-1 pl-0 text-red-600">- {formatCurrency(discountAmount)}</td>
+                                    </tr>
+                                )}
+
+                                {/* 3. TDS/TCS */}
+                                {taxAmount > 0 && (
+                                    <tr className="print:break-inside-avoid">
+                                        <td className="p-1 pr-0 font-medium">{taxType} ({taxRate}%)</td>
+                                        <td className="p-1 pl-0 text-red-600">- {formatCurrency(taxAmount)}</td>
+                                    </tr>
+                                )}
+
+                                {/* 4. Adjustment */}
+                                {finalAdjustment !== 0 && (
+                                    <tr className="print:break-inside-avoid">
+                                        <td className="p-1 pr-0 font-medium">{adjustmentDescription}</td>
+                                        <td className={`p-1 pl-0 ${finalAdjustment < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                            {finalAdjustment >= 0 ? '+' : ''} {formatCurrency(finalAdjustment)}
+                                        </td>
+                                    </tr>
+                                )}
+
+                                {/* 5. Total */}
+                                <tr className="border-b border-t border-black print:break-inside-avoid">
+                                    <td className="p-1 pr-0 font-semibold">Total</td>
+                                    <td className="p-1 pl-0">{formatCurrency(totalAmount)}</td>
+                                </tr>
+
+                                {/* 6. Balance Due */}
+                                <tr className="text-base font-bold print:break-inside-avoid">
+                                    <td className="p-1 pr-0">Balance Due</td>
+                                    <td className="p-1 pl-0">{formatCurrency(balanceDue)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Total in Words */}
+                <div className="mt-8 text-sm print:break-inside-avoid">
+                    <p className="font-medium text-gray-900">
+                        Total In Words: <span className="italic">{numberToWords(totalAmount)}</span>
                     </p>
                 </div>
 
-                {/* Totals Summary - Right side (UPDATED) */}
-                <div className="w-1/3">
-                    <table className="min-w-full text-right text-sm">
-                        <tbody>
-                            {/* 1. Sub Total */}
-                            <tr>
-                                <td className="p-1 pr-0 font-semibold">Sub Total</td>
-                                <td className="p-1 pl-0">{formatCurrency(subTotal)}</td>
-                            </tr>
+                {/* Notes */}
+                <div className="mt-6 print:break-inside-avoid">
+                    <p className="font-bold text-gray-700 text-sm mb-1">Notes</p>
+                    <p className="text-gray-600">{notes}</p>
+                </div>
 
-                            {/* 2. Discount */}
-                            {discount > 0 && (
-                                <tr>
-                                    <td className="p-1 pr-0 font-medium">Discount ({discount}%)</td>
-                                    <td className="p-1 pl-0 text-red-600">- {formatCurrency(discountAmount)}</td>
-                                </tr>
-                            )}
-
-                            {/* 3. TDS/TCS */}
-                            {taxAmount > 0 && (
-                                <tr>
-                                    <td className="p-1 pr-0 font-medium">{taxType} ({taxRate}%)</td>
-                                    <td className="p-1 pl-0 text-red-600">- {formatCurrency(taxAmount)}</td>
-                                </tr>
-                            )}
-
-                            {/* 4. Adjustment */}
-                            {finalAdjustment !== 0 && (
-                                <tr>
-                                    <td className="p-1 pr-0 font-medium">{adjustmentDescription}</td>
-                                    <td className={`p-1 pl-0 ${finalAdjustment < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                        {finalAdjustment >= 0 ? '+' : ''} {formatCurrency(finalAdjustment)}
-                                    </td>
-                                </tr>
-                            )}
-
-                            {/* 5. Total */}
-                            <tr className="border-b border-t border-black">
-                                <td className="p-1 pr-0 font-semibold">Total</td>
-                                <td className="p-1 pl-0">{formatCurrency(totalAmount)}</td>
-                            </tr>
-
-                            {/* 6. Balance Due */}
-                            <tr className="text-base font-bold">
-                                <td className="p-1 pr-0">Balance Due</td>
-                                <td className="p-1 pl-0">{formatCurrency(balanceDue)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                {/* Signature */}
+                <div className="mt-20 pt-1 text-right w-1/3 float-right print:break-inside-avoid">
+                    <p className="border-t border-black pt-1 text-sm font-semibold mb-1">{authorizedSignature}</p>
+                    <p className="text-xs text-gray-600">Authorized Signature</p>
                 </div>
             </div>
-
-            {/* ... (Total in Words, Notes, Signature sections remain unchanged) ... */}
-            {/* Total in Words */}
-            <div className="mt-8 text-sm">
-                <p className="font-medium text-gray-900">
-                    Total In Words: <span className="italic">{numberToWords(totalAmount)}</span>
-                </p>
-            </div>
-
-            {/* Notes */}
-            <div className="mt-6">
-                <p className="font-bold text-gray-700 text-sm mb-1">Notes</p>
-                <p className="text-gray-600">{notes}</p>
-            </div>
-
-            {/* Signature */}
-            <div className="mt-20 pt-1 text-right w-1/3 float-right">
-                <p className="border-t border-black pt-1 text-sm font-semibold mb-1">{authorizedSignature}</p>
-                <p className="text-xs text-gray-600">Authorized Signature</p>
-            </div>
-
         </div>
     );
 };

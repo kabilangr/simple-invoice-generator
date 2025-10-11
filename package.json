@@ -2,7 +2,6 @@
   "name": "simple-invoice-generator",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://kabilangr.github.io/simple-invoice-generator",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
