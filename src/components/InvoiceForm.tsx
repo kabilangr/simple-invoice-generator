@@ -406,7 +406,7 @@ const InvoiceForm: React.FC = () => {
                     <div className='absolute top-4 right-4 text-gray-600 hover:text-gray-900 font-semibold text-3xl cursor-pointer z-10'>&times;</div>
                 </div>
             }
-            <div className={showPreview ? " absolute h-[calc(100vh-10rem)] w-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" : " fixed bottom-0 right-0 h-64 w-48 p-4  bg-gray-200"}>
+            <div className={showPreview ? " absolute h-[calc(100vh-10rem)] w-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" : " fixed bottom-0 right-0 h-64 w-48 p-4 overflow-hidden bg-gray-200"}>
                 {/* <h2 className="text-2xl font-bold mb-4 text-gray-800">PDF Preview</h2> */}
                 {!showPreview &&
                     <div
