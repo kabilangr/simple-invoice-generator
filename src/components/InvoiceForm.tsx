@@ -7,7 +7,6 @@ import InvoicePDF from './InvoicePDF';
 
 import type { IInvoiceFormData, IInvoiceItem } from '../type/invoice';
 
-// --- Default Invoice Structure (Typed) ---
 const defaultValues: IInvoiceFormData = {
     // Your Info
     yourName: '',
@@ -42,6 +41,8 @@ const defaultValues: IInvoiceFormData = {
 
 // --- Main Form Component ---
 const InvoiceForm: React.FC = () => {
+
+    const [showPreview, setShowPreview] = React.useState(false);
     const {
         register,
         handleSubmit,
@@ -131,10 +132,10 @@ const InvoiceForm: React.FC = () => {
         <div className="flex flex-col bg-gray-100 min-h-screen">
 
             {/* --- Form Section --- */}
-            <div className="p-8 overflow-y-auto">
+            <div className="container mx-auto p-8 overflow-y-auto">
                 <h1 className="text-3xl font-bold mb-6 text-gray-800">Invoice Creator</h1>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white p-6 rounded-lg shadow-lg">
+                <form onSubmit={handleSubmit(onSubmit)} className=" mx-16 space-y-6 bg-white p-6 rounded-lg shadow-lg">
 
                     {/* ... (Your Information, Client & Invoice Details, Service / Item Details sections remain unchanged) ... */}
 
@@ -266,7 +267,7 @@ const InvoiceForm: React.FC = () => {
 
                     {/* --- NEW: Totals Section and Inputs (matches image_b78740.png) --- */}
                     <div className="flex justify-end">
-                        <div className="w-full sm:w-1/2 p-4 border rounded-lg bg-gray-50 space-y-4">
+                        <div className="w-full lg:w-1/2 p-4 border rounded-lg bg-gray-50 space-y-4">
 
                             {/* Sub Total */}
                             <div className="flex justify-between items-center text-lg font-bold">
@@ -397,9 +398,23 @@ const InvoiceForm: React.FC = () => {
             </div>
 
             {/* --- PDF Preview Section --- */}
-            <div className=" p-4 lg:p-8 bg-gray-200">
-                <h2 className="text-2xl font-bold mb-4 text-gray-800">PDF Preview</h2>
-                <div className="bg-white shadow-xl max-w-full overflow-x-auto">
+            {showPreview &&
+                <div
+                    className='fixed inset-0 bg-gray-100/70 flex justify-center items-center z-0'
+                    onClick={() => setShowPreview(false)}
+                >
+                    <div className='absolute top-4 right-4 text-gray-600 hover:text-gray-900 font-semibold text-3xl cursor-pointer z-10'>&times;</div>
+                </div>
+            }
+            <div className={showPreview ? " absolute h-[calc(100vh-10rem)] w-auto top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" : " fixed bottom-0 right-0 h-64 w-48 p-4  bg-gray-200"}>
+                {/* <h2 className="text-2xl font-bold mb-4 text-gray-800">PDF Preview</h2> */}
+                {!showPreview &&
+                    <div
+                        className=' absolute bg-gray-100/70 hover:bg-gray-400/80 hover:text-white font-semibold text-5xl cursor-pointer h-56 w-40 z-10 flex justify-center items-center'
+                        onClick={() => setShowPreview(true)}>
+                        <span className='text-xs'>Show PDF Preview</span>
+                    </div>}
+                <div className={showPreview ? "" : "bg-white shadow-xl scale-[0.2] origin-top-left "}>
                     {/* Pass the fully calculated formData to the PrintableInvoice */}
                     <PrintableInvoice ref={componentRef} data={formData as IInvoiceFormData} />
                 </div>
