@@ -41,6 +41,7 @@ export interface IInvoiceFormData {
 
     discount: number;
     taxType: TaxType;
+    taxTypeLabel: string;
     taxRate: number;
     adjustmentDescription: string;
     adjustmentAmount: number;

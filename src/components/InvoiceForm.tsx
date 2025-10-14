@@ -1,7 +1,7 @@
 // src/components/InvoiceForm.tsx
 'use client';
 import React, { useRef, forwardRef, type ForwardedRef, useMemo } from 'react';
-import { useForm, useFieldArray, type SubmitHandler } from 'react-hook-form';
+import { useForm, useFieldArray, type SubmitHandler, useWatch } from 'react-hook-form';
 import { useReactToPrint } from 'react-to-print';
 import InvoicePDF from './InvoicePDF';
 
@@ -36,6 +36,7 @@ const defaultValues: IInvoiceFormData = {
     items: [],
     discount: 0, // 0%
     taxType: 'None', // Default to 'None'
+    taxTypeLabel: 'No Tax', // Default label
     taxRate: 0, // 0%
     adjustmentDescription: 'Adjustment', // Default label
     adjustmentAmount: 0,
@@ -74,6 +75,14 @@ const InvoiceForm: React.FC = () => {
 
     const formData = watch();
 
+    const watchedValues = useWatch({
+        control,
+        name: ["items", "discount", "taxType", "taxRate", "adjustmentAmount"]
+    });
+
+    const [watchedItems, watchedDiscount, watchedTaxType, watchedTaxRate, watchedAdjustmentAmount] = watchedValues;
+
+
     const { subTotal, totalAmount, balanceDue } = useMemo(() => {
         const calculatedSubTotal = formData.items.reduce((sum, item) =>
             sum + (item.qty * item.rate || 0), 0);
@@ -95,7 +104,7 @@ const InvoiceForm: React.FC = () => {
             totalAmount: calculatedTotalAmount,
             balanceDue: calculatedTotalAmount,
         };
-    }, [formData.items, formData.discount, formData.taxType, formData.taxRate, formData.adjustmentAmount, formData.items]);
+    }, [watchedItems, watchedDiscount, watchedTaxType, watchedTaxRate, watchedAdjustmentAmount]);
 
 
     formData.subTotal = subTotal;
@@ -365,46 +374,43 @@ const InvoiceForm: React.FC = () => {
 
                             {/* TDS / TCS Field */}
                             <div className="flex justify-between items-center">
-                                {/* Radio Buttons */}
-                                <div className="flex flex-col space-x-3 text-sm">
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            value="None"
-                                            {...register("taxType")}
-                                            className="mr-1"
-                                            defaultChecked
-                                        />
-                                        None
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            value="TDS"
-                                            {...register("taxType")}
-                                            className="mr-1"
-                                        />
-                                        TDS
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            value="TCS"
-                                            {...register("taxType")}
-                                            className="mr-1"
-                                        />
-                                        TCS
-                                    </label>
+                                {/* Tax Type Dropdown */}
+                                <div className="w-1/5">
+                                    <select
+                                        {...register("taxType", {
+                                            onChange: (e) => {
+                                                if (e.target.value === 'None') {
+                                                    setValue('taxRate', 0);
+                                                    setValue('taxTypeLabel', 'No Tax');
+                                                } else {
+                                                    setValue('taxTypeLabel', "");
+                                                }
+                                            }
+                                        })}
+                                        className="w-full p-1 border rounded text-sm bg-white"
+                                    >
+                                        <option value="None">None</option>
+                                        <option value="TDS">TDS</option>
+                                        <option value="TCS">TCS</option>
+                                    </select>
                                 </div>
 
                                 {/* Select Tax Rate Dropdown (Simulated with Input) */}
+                                <div>
+                                    <input
+                                        type="text"
+                                        className="w-full p-1 border rounded text-right text-sm"
+                                        {...register("taxTypeLabel")}
+                                        disabled={formData.taxType === 'None'}
+                                    />
+                                </div>
                                 <div className="w-1/3">
                                     <input
                                         type="number"
                                         step="0.01"
                                         placeholder="Rate (%)"
                                         {...register("taxRate", { valueAsNumber: true, min: 0, max: 100 })}
-                                        className="w-full p-1 border rounded text-right text-sm"
+                                        className="w-1/2 p-1 border rounded text-right text-sm"
                                         disabled={formData.taxType === 'None'}
                                     />
                                 </div>

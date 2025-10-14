@@ -47,7 +47,7 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
         items, notes, authorizedSignature, logo,
         subTotal, totalAmount, balanceDue,
         // --- NEW FIELDS DESTRUCTURED ---
-        discount, taxType, taxRate, adjustmentDescription, adjustmentAmount
+        discount, taxType, taxTypeLabel, taxRate, adjustmentDescription, adjustmentAmount
     } = data;
 
     const PlaceholderLogo: React.FC = () => (
@@ -206,7 +206,7 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
                                 {/* 3. TDS/TCS */}
                                 {taxAmount > 0 && (
                                     <tr className="print:break-inside-avoid">
-                                        <td className="p-1 pr-0 font-medium">{taxType} ({taxRate}%)</td>
+                                        <td className="p-1 pr-0 font-medium">{taxType} {(taxTypeLabel) ? `-${taxTypeLabel}` : taxTypeLabel} ({taxRate}%)</td>
                                         <td className="p-1 pl-0 text-red-600">- {formatCurrency(taxAmount)}</td>
                                     </tr>
                                 )}
