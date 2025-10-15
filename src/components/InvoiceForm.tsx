@@ -171,7 +171,7 @@ const InvoiceForm: React.FC = () => {
                         </div>
                         <div>
                             <label className={labelStyle}>Your Email (Optional)
-                                <input type="email" {...register("yourEmail", { required: "Email is required" })} className={inputStyle} />
+                                <input type="email" {...register("yourEmail")} className={inputStyle} />
                             </label>
                             {errors.yourEmail && <p className={errorStyle}>{errors.yourEmail.message}</p>}
                         </div>
@@ -223,7 +223,7 @@ const InvoiceForm: React.FC = () => {
                         </div>
                         <div>
                             <label className={labelStyle}>Bill Email (Optional)
-                                <input type="email" {...register("billToEmail", { required: "Email is required" })} className={inputStyle} />
+                                <input type="email" {...register("billToEmail")} className={inputStyle} />
                             </label>
                             {errors.yourEmail && <p className={errorStyle}>{errors.yourEmail.message}</p>}
                         </div>
@@ -358,7 +358,7 @@ const InvoiceForm: React.FC = () => {
                             {/* Discount Field */}
                             <div className="flex justify-between items-center">
                                 <label className="text-sm">Discount</label>
-                                <div className="flex w-1/3 space-x-2 items-center">
+                                <div className="flex w-2/3 space-x-2 items-center">
                                     <input
                                         type="number"
                                         step="0.01"
