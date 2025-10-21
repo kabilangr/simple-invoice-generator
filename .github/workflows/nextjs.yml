@@ -73,6 +73,65 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+      
+      - name: Check Firebase Environment Variables
+        run: |
+          echo "🔍 Checking Firebase configuration..."
+          MISSING_VARS=()
+          
+          # Check each required environment variable
+          if [ -z "${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}" ]; then
+            MISSING_VARS+=("NEXT_PUBLIC_FIREBASE_API_KEY")
+          fi
+          
+          if [ -z "${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}" ]; then
+            MISSING_VARS+=("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN")
+          fi
+          
+          if [ -z "${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}" ]; then
+            MISSING_VARS+=("NEXT_PUBLIC_FIREBASE_PROJECT_ID")
+          fi
+          
+          if [ -z "${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}" ]; then
+            MISSING_VARS+=("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET")
+          fi
+          
+          if [ -z "${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}" ]; then
+            MISSING_VARS+=("NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID")
+          fi
+          
+          if [ -z "${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}" ]; then
+            MISSING_VARS+=("NEXT_PUBLIC_FIREBASE_APP_ID")
+          fi
+          
+          # Report results
+          if [ ${#MISSING_VARS[@]} -eq 0 ]; then
+            echo "✅ All Firebase environment variables are configured!"
+            echo "   - NEXT_PUBLIC_FIREBASE_API_KEY: ✓"
+            echo "   - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ✓"
+            echo "   - NEXT_PUBLIC_FIREBASE_PROJECT_ID: ✓"
+            echo "   - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ✓"
+            echo "   - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ✓"
+            echo "   - NEXT_PUBLIC_FIREBASE_APP_ID: ✓"
+            echo ""
+            echo "🚀 Proceeding with build..."
+          else
+            echo "❌ Missing Firebase environment variables:"
+            for var in "${MISSING_VARS[@]}"; do
+              echo "   - $var"
+            done
+            echo ""
+            echo "⚠️  WARNING: The build will use fallback demo values."
+            echo "    Firebase authentication will NOT work on the deployed site!"
+            echo ""
+            echo "📖 To fix this:"
+            echo "   1. Go to: Settings → Secrets and variables → Actions"
+            echo "   2. Add the missing secrets from your Firebase Console"
+            echo "   3. See .github/SETUP_SECRETS.md for detailed instructions"
+            echo ""
+            echo "ℹ️  The build will continue, but the app will show a configuration warning."
+          fi
+      
       - name: Build with Next.js
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}

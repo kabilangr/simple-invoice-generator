@@ -50,7 +50,14 @@ A modern, feature-rich invoice generator built with Next.js, Firebase, and TypeS
    NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abc123
    ```
 
-4. **Run development server**
+4. **Verify configuration** (optional but recommended)
+   ```bash
+   ./check-env.sh
+   ```
+   
+   This will validate all Firebase environment variables are set correctly.
+
+5. **Run development server**
    ```bash
    npm run dev
    ```
@@ -93,6 +100,8 @@ See the complete [**Deployment Guide**](DEPLOYMENT.md) for step-by-step instruct
 
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide for GitHub Pages
 - **[.github/SETUP_SECRETS.md](.github/SETUP_SECRETS.md)** - How to configure GitHub secrets
+- **[.github/ENV_VALIDATION.md](.github/ENV_VALIDATION.md)** - Environment validation tools
+- **[BUILD_FIX.md](BUILD_FIX.md)** - Build configuration and troubleshooting
 - **[MULTI_COMPANY_SYSTEM.md](MULTI_COMPANY_SYSTEM.md)** - Technical architecture and API reference
 - **[MULTI_COMPANY_QUICKSTART.md](MULTI_COMPANY_QUICKSTART.md)** - Quick start guide for multi-company features
 
@@ -162,6 +171,9 @@ npm run dev          # Start development server
 npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
+
+./check-env.sh       # Validate Firebase environment variables
+./setup.sh           # Automated project setup
 ```
 
 ## 🔐 Security
