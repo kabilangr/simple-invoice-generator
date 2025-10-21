@@ -1,11 +1,11 @@
 // src/components/SignIn.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { RecaptchaVerifier } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, isFirebaseConfigured } from '@/lib/firebase';
 
 type AuthMode = 'signin' | 'signup';
 type AuthMethod = 'email' | 'phone' | 'google' | 'apple';
@@ -20,9 +20,17 @@ const SignIn: React.FC = () => {
     const [confirmationResult, setConfirmationResult] = useState<any>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showConfigWarning, setShowConfigWarning] = useState(false);
 
     const { signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple, signInWithPhone } = useAuth();
     const router = useRouter();
+
+    // Check Firebase configuration on mount
+    useEffect(() => {
+        if (!isFirebaseConfigured()) {
+            setShowConfigWarning(true);
+        }
+    }, []);
 
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -133,6 +141,28 @@ const SignIn: React.FC = () => {
                         {mode === 'signin' ? 'Sign in to your account' : 'Create a new account'}
                     </p>
                 </div>
+
+                {/* Firebase Configuration Warning */}
+                {showConfigWarning && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-sm font-medium text-yellow-800">
+                                    Firebase Not Configured
+                                </h3>
+                                <div className="mt-2 text-xs text-yellow-700">
+                                    <p>Firebase environment variables are not set. Please configure them to enable authentication.</p>
+                                    <p className="mt-1">See <code className="bg-yellow-100 px-1 rounded">.env.example</code> or <code className="bg-yellow-100 px-1 rounded">DEPLOYMENT.md</code> for setup instructions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Auth Method Tabs */}
                 <div className="flex gap-2 border-b border-gray-200">
