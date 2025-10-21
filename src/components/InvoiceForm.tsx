@@ -1,9 +1,12 @@
 // src/components/InvoiceForm.tsx
 'use client';
-import React, { useRef, forwardRef, type ForwardedRef, useMemo } from 'react';
+import React, { useRef, forwardRef, type ForwardedRef, useMemo, useEffect, useState } from 'react';
 import { useForm, useFieldArray, type SubmitHandler, useWatch } from 'react-hook-form';
 import { useReactToPrint } from 'react-to-print';
 import InvoicePDF from './InvoicePDF';
+import { useAuth } from '@/context/AuthContext';
+import { useCompany } from '@/context/CompanyContext';
+import { getUserProfile } from '@/lib/firestore';
 
 import type { IInvoiceFormData, IInvoiceItem } from '../type/invoice';
 
@@ -55,6 +58,11 @@ const defaultValues: IInvoiceFormData = {
 const InvoiceForm: React.FC = () => {
 
     const [showPreview, setShowPreview] = React.useState(false);
+    const [dataSource, setDataSource] = useState<'profile' | 'company' | 'custom'>('company');
+    const [dataLoaded, setDataLoaded] = useState(false);
+    const { user } = useAuth();
+    const { selectedCompany } = useCompany();
+
     const {
         register,
         handleSubmit,
@@ -66,6 +74,63 @@ const InvoiceForm: React.FC = () => {
         defaultValues,
         mode: "onChange",
     });
+
+    // Load data based on selected source
+    useEffect(() => {
+        const loadData = async () => {
+            if (!user) return;
+
+            try {
+                if (dataSource === 'profile') {
+                    // Load user profile data
+                    const profile = await getUserProfile(user.uid);
+                    if (profile) {
+                        setValue('yourName', profile.fullName);
+                        setValue('yourEmail', profile.email);
+                        setValue('yourPhone', profile.phone);
+                        setValue('yourAddress', '');
+                        setValue('yourCity', '');
+                        setValue('yourState', '');
+                        setValue('yourCountry', '');
+                        setValue('yourPinCode', null);
+                        setDataLoaded(true);
+                    }
+                } else if (dataSource === 'company' && selectedCompany) {
+                    // Load company data
+                    setValue('yourName', selectedCompany.companyName);
+                    setValue('yourEmail', selectedCompany.email);
+                    setValue('yourPhone', selectedCompany.phone);
+                    setValue('yourAddress', selectedCompany.address);
+                    setValue('yourCity', selectedCompany.city);
+                    setValue('yourState', selectedCompany.state);
+                    setValue('yourCountry', selectedCompany.country);
+                    setValue('yourPinCode', selectedCompany.pinCode ? parseInt(selectedCompany.pinCode) : null);
+                    setDataLoaded(true);
+                } else if (dataSource === 'custom') {
+                    // Clear fields for custom entry
+                    setValue('yourName', '');
+                    setValue('yourEmail', '');
+                    setValue('yourPhone', '');
+                    setValue('yourAddress', '');
+                    setValue('yourCity', '');
+                    setValue('yourState', '');
+                    setValue('yourCountry', '');
+                    setValue('yourPinCode', null);
+                    setDataLoaded(true);
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        };
+
+        loadData();
+    }, [user, dataSource, selectedCompany, setValue]);
+
+    // Handle data source change
+    const handleDataSourceChange = (newSource: 'profile' | 'company' | 'custom') => {
+        setDataSource(newSource);
+        setDataLoaded(false);
+    };
 
 
     const { fields, append, remove } = useFieldArray({
@@ -161,53 +226,159 @@ const InvoiceForm: React.FC = () => {
 
                     {/* Your Information */}
                     <h2 className="text-xl font-semibold border-b pb-2 mb-4">Your Information</h2>
+
+                    {/* Data Source Toggle */}
+                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm font-medium text-gray-700 mb-3">Invoice From:</p>
+                        <div className="flex gap-6 flex-wrap">
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    checked={dataSource === 'profile'}
+                                    onChange={() => handleDataSourceChange('profile')}
+                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm font-medium text-gray-900">
+                                    My Profile (Personal)
+                                </span>
+                            </label>
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    checked={dataSource === 'company'}
+                                    onChange={() => handleDataSourceChange('company')}
+                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm font-medium text-gray-900">
+                                    Company ({selectedCompany?.companyName || 'Select Company'})
+                                </span>
+                            </label>
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    checked={dataSource === 'custom'}
+                                    onChange={() => handleDataSourceChange('custom')}
+                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                                />
+                                <span className="ml-2 text-sm font-medium text-gray-900">
+                                    Custom Data
+                                </span>
+                            </label>
+                        </div>
+                        {dataSource === 'profile' && (
+                            <p className="mt-2 text-xs text-gray-600">
+                                � Your personal profile information will be used.
+                            </p>
+                        )}
+                        {dataSource === 'company' && selectedCompany && (
+                            <p className="mt-2 text-xs text-gray-600">
+                                🏢 {selectedCompany.companyName} details will be used.
+                            </p>
+                        )}
+                        {dataSource === 'company' && !selectedCompany && (
+                            <p className="mt-2 text-xs text-red-600">
+                                ⚠️ Please select a company from the header dropdown.
+                            </p>
+                        )}
+                        {dataSource === 'custom' && (
+                            <p className="mt-2 text-xs text-gray-600">
+                                ✏️ Fill in custom information manually.
+                            </p>
+                        )}
+                    </div>
+
                     <div className="grid gap-6 mb-6 md:grid-cols-2">
                         <div>
                             {/* Label wraps input */}
                             <label className={labelStyle}>Your Name
-                                <input type="text" {...register("yourName", { required: "Name is required" })} className={inputStyle} />
+                                <input
+                                    type="text"
+                                    {...register("yourName", { required: "Name is required" })}
+                                    className={inputStyle}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                             {errors.yourName && <p className={errorStyle}>{errors.yourName.message}</p>}
                         </div>
                         <div>
                             <label className={labelStyle}>Your Email (Optional)
-                                <input type="email" {...register("yourEmail")} className={inputStyle} />
+                                <input
+                                    type="email"
+                                    {...register("yourEmail")}
+                                    className={inputStyle}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                             {errors.yourEmail && <p className={errorStyle}>{errors.yourEmail.message}</p>}
                         </div>
                         <div>
                             <label className={labelStyle}>Address (Optional)
-                                <input type="text" {...register("yourAddress")} className={inputStyle} />
+                                <input
+                                    type="text"
+                                    {...register("yourAddress")}
+                                    className={inputStyle}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                         </div>
                         <div>
                             <label className={labelStyle}>City (Optional)
-                                <input type="text" {...register("yourCity")} className={inputStyle} />
+                                <input
+                                    type="text"
+                                    {...register("yourCity")}
+                                    className={inputStyle}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                         </div>
                         <div>
                             <label className={labelStyle}>State/Province (Optional)
-                                <input type="text" {...register("yourState")} className={inputStyle} />
+                                <input
+                                    type="text"
+                                    {...register("yourState")}
+                                    className={inputStyle}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                         </div>
                         <div>
                             <label className={labelStyle}>Country (Optional)
-                                <input type="text" {...register("yourCountry")} className={inputStyle} />
+                                <input
+                                    type="text"
+                                    {...register("yourCountry")}
+                                    className={inputStyle}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                         </div>
                         <div>
                             <label className={labelStyle}>Pin Code (Optional)
-                                <input type="number" {...register("yourPinCode")} className={`${inputStyle} input-number-no-step`} />
+                                <input
+                                    type="number"
+                                    {...register("yourPinCode")}
+                                    className={`${inputStyle} input-number-no-step`}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                         </div>
                         <div>
                             <label className={labelStyle}>Phone Number/Telephone (Optional)
-                                <input type="text" {...register("yourPhone")} className={`${inputStyle}`} />
+                                <input
+                                    type="text"
+                                    {...register("yourPhone")}
+                                    className={`${inputStyle}`}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                         </div>
                         <div>
                             <label className={labelStyle}>Logo (Optional)
-                                <input type="file" {...register("logo")} className={inputStyle} />
+                                <input
+                                    type="file"
+                                    {...register("logo")}
+                                    className={inputStyle}
+                                    disabled={dataSource !== 'custom'}
+                                />
                             </label>
                         </div>
                     </div>

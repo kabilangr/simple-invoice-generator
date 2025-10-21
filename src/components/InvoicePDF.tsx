@@ -140,25 +140,11 @@ const InvoicePDF: React.FC<IInvoicePDFProps> = ({ data }) => {
             <div className="mb-8 border border-black">
                 <table className="min-w-full border-collapse">
                     <thead>
-                        <tr className="bg-gray-100 text-left text-sm font-semibold text-gray-700 border-b border-black print:break-inside-avoid">
-                            {/* Headings from PDF: "#", "Item & Description", "Qty", "Rate", "Amount" */}
-                            <th className="p-2 border-r border-black w-[5%] text-center">#</th>
-                            <th className="p-2 border-r border-black w-[55%]">Item & Description</th> {/* Increased width for description */}
-                            <th className="p-2 border-r border-black w-[10%] text-right">Qty</th>
-                            <th className="p-2 border-r border-black w-[15%] text-right">Rate</th>
-                            <th className="p-2 w-[15%] text-right">Amount</th>
-                        </tr>
+                        <tr className="bg-gray-100 text-left text-sm font-semibold text-gray-700 border-b border-black print:break-inside-avoid"><th className="p-2 border-r border-black w-[5%] text-center">#</th><th className="p-2 border-r border-black w-[55%]">Item & Description</th><th className="p-2 border-r border-black w-[10%] text-right">Qty</th><th className="p-2 border-r border-black w-[15%] text-right">Rate</th><th className="p-2 w-[15%] text-right">Amount</th></tr>
                     </thead>
                     <tbody>
                         {items.map((item, index) => (
-                            // KEY CHANGE 3: Add `break-inside-avoid` to keep rows from splitting
-                            <tr key={index} className="text-sm align-top border-b border-gray-300 last:border-b-0 print:break-inside-avoid">
-                                <td className="p-2 border-r border-gray-300 text-center">{index + 1}</td>
-                                <td className="p-2 border-r border-gray-300 whitespace-pre-wrap text-xs leading-snug">{item.description}</td>
-                                <td className="p-2 border-r border-gray-300 text-right">{item.qty.toFixed(2)}</td>
-                                <td className="p-2 border-r border-gray-300 text-right">{formatCurrency(item.rate)}</td>
-                                <td className="p-2 text-right">{formatCurrency(item.qty * item.rate)}</td>
-                            </tr>
+                            <tr key={index} className="text-sm align-top border-b border-gray-300 last:border-b-0 print:break-inside-avoid"><td className="p-2 border-r border-gray-300 text-center">{index + 1}</td><td className="p-2 border-r border-gray-300 whitespace-pre-wrap text-xs leading-snug">{item.description}</td><td className="p-2 border-r border-gray-300 text-right">{item.qty.toFixed(2)}</td><td className="p-2 border-r border-gray-300 text-right">{formatCurrency(item.rate)}</td><td className="p-2 text-right">{formatCurrency(item.qty * item.rate)}</td></tr>
                         ))}
                     </tbody>
                 </table>
