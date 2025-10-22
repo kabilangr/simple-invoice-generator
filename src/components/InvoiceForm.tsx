@@ -377,7 +377,7 @@ const InvoiceForm: React.FC = () => {
                                     type="file"
                                     {...register("logo")}
                                     className={inputStyle}
-                                    disabled={dataSource !== 'custom'}
+                                // disabled={dataSource !== 'custom'}
                                 />
                             </label>
                         </div>
