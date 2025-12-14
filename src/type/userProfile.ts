@@ -11,6 +11,12 @@ export interface IUserProfile {
     createdAt: Date;
     updatedAt: Date;
     isProfileComplete: boolean;
+
+    // Monetization
+    subscriptionStatus: 'free' | 'pro';
+    credits: number; // For pay-per-use
+    invoiceCount: number; // Total invoices created
+    subscriptionExpiry?: Date;
 }
 
 export interface IUserProfileFormData {

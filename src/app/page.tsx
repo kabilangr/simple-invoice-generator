@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import InvoiceForm from "@/components/InvoiceForm";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useCompany } from "@/context/CompanyContext";
-import { isProfileComplete, hasCompanies } from "@/lib/firestore";
+import { isProfileComplete, hasCompanies, getUserInvoices } from "@/lib/firestore";
+import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { IInvoice } from "@/type/invoice";
+import { Button } from "@/components/ui/Button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 export default function Home() {
   const { user, signOut } = useAuth();
@@ -14,6 +21,7 @@ export default function Home() {
   const router = useRouter();
   const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
   const [userHasCompanies, setUserHasCompanies] = useState<boolean | null>(null);
+  const [invoices, setInvoices] = useState<IInvoice[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +42,13 @@ export default function Home() {
 
           if (!hasComp) {
             router.push('/companies');
+            return;
           }
+
+          // Fetch invoices for analytics
+          const invData = await getUserInvoices(user.uid);
+          setInvoices(invData);
+
         } catch (error) {
           console.error('Error checking profile:', error);
         } finally {
@@ -48,74 +62,62 @@ export default function Home() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
-        <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <DashboardLayout>
+        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
           <div className="text-center">
-            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+            <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
             <p className="mt-4 text-gray-600">Loading...</p>
           </div>
         </div>
-      </ProtectedRoute>
+      </DashboardLayout>
     );
   }
 
   return (
-    <ProtectedRoute>
-      <div className="">
-        {/* Header with Sign Out */}
-        <header className="bg-white shadow-sm">
-          <div className="container mx-auto px-8 py-4 flex justify-between items-center">
-            <h1 className="text-xl font-semibold text-gray-800">Invoice Generator</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">{user?.email || user?.phoneNumber}</span>
+    <DashboardLayout>
+      <div className="space-y-6">
 
-              {/* Company Selector Dropdown */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+           <div>
+              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-muted-foreground mt-1">Welcome back, {user?.displayName || 'User'}</p>
+           </div>
+           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               {companies.length > 0 && (
-                <div className="relative">
-                  <select
-                    value={selectedCompany?.id || ''}
-                    onChange={(e) => selectCompany(e.target.value)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Company</option>
-                    {companies.map((company) => (
-                      <option key={company.id} value={company.id}>
-                        {company.companyName}
-                      </option>
-                    ))}
-                  </select>
+                <div className="w-full sm:w-64">
+                  <CustomSelect
+                    value={selectedCompany ? { label: selectedCompany.companyName, value: selectedCompany.id } : null}
+                    onChange={(option: any) => option && selectCompany(option.value)}
+                    options={companies.map(c => ({ label: c.companyName, value: c.id }))}
+                    placeholder="Select Company"
+                    isSearchable={false}
+                  />
                 </div>
               )}
+              <Link href="/invoices/new">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Invoice
+                  </Button>
+              </Link>
+           </div>
+        </div>
 
-              <button
-                onClick={() => router.push('/companies')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
-              >
-                Manage Companies
-              </button>
+        {/* Stats Cards */}
+        <DashboardStats invoices={invoices} />
 
-              <button
-                onClick={() => router.push('/profile')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
-              >
-                Profile
-              </button>
-              <button
-                onClick={() => signOut()}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              >
-                Sign Out
-              </button>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Revenue Chart */}
+            <div className="lg:col-span-2">
+                <RevenueChart invoices={invoices} />
             </div>
-          </div>
-        </header>
 
-        <main className="">
-          <InvoiceForm />
-        </main>
-        <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        </footer>
+            {/* Recent Activity */}
+            <div>
+                <RecentActivity invoices={invoices} />
+            </div>
+        </div>
       </div>
-    </ProtectedRoute>
+    </DashboardLayout>
   );
 }

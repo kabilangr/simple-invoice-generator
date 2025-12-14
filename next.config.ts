@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
   },
   // assetPrefix: '/simple-invoice-generator',
   // basePath: '/simple-invoice-generator',
-  output: 'export',
 };
 
 export default nextConfig;
